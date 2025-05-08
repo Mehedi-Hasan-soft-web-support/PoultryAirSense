@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PoultryAirSense</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #6366F1;
+            --secondary-color: #F59E0B;
+            --text-primary: #333333;
+            --text-secondary: #64748B;
+            --bg-primary: #FFFFFF;
+            --bg-sidebar: #111827;
+            --bg-card: #FFFFFF;
+            --border-color: #E2E8F0;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F1F5F9;
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+        }
+        
+        .sidebar {
+            width: 240px;
+            background-color: var(--bg-sidebar);
+            color: white;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .logo {
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
+        }
+        
+        .logo-text {
+            font-weight: 600;
+            font-size: 18px;
+            color: white;
+        }
+        
+        .nav-section {
+            margin-bottom: 30px;
+        }
+        
+        .nav-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 15px;
+        }
+        
+        .nav-items {
+            list-style: none;
+        }
+        
+        .nav-item {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .nav-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-item.active {
+            background-color: rgba(99, 102, 241, 0.2);
+        }
+        
+        .nav-item i {
+            margin-right: 10px;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .main-content {
+            flex-grow: 1;
+            padding: 20px 30px;
+            overflow: auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+        
+        .search-container {
+            flex-grow: 1;
+            margin-right: 20px;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 10px 15px;
+            padding-left: 40px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+        }
+        
+        .action-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+        }
+        
+        .action-button i {
+            margin-right: 5px;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .user-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #DDD;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+        
+        .dropdown-icon {
+            margin-left: 5px;
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+        
+        .grid-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        
+        .card-wide {
+            grid-column: span 2;
+        }
+        
+        .card-medium {
+            grid-column: span 2;
+        }
+        
+        .metric-card {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .metric-icon {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .metric-icon i {
+            color: var(--primary-color);
+            margin-right: 10px;
+        }
+        
+        .metric-icon.blue i {
+            color: #3B82F6;
+        }
+        
+        .metric-icon.green i {
+            color: #10B981;
+        }
+        
+        .metric-icon.amber i {
+            color: #F59E0B;
+        }
+        
+        .metric-icon.purple i {
+            color: #8B5CF6;
+        }
+        
+        .metric-title {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        
+        .metric-value {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .chart-container {
+            width: 100%;
+            height: 250px;
+        }
+        
+        .chart-tall {
+            height: 350px;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .chart-title {
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .date-filter {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 15px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .date-filter i {
+            margin-left: 10px;
+            color: var(--text-secondary);
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        
+        .data-table th {
+            text-align: left;
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+        
+        .data-table td {
+            padding: 12px 15px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .data-table tr:hover {
+            background-color: #F8FAFC;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-green {
+            background-color: rgba(16, 185, 129, 0.1);
+            color: #10B981;
+        }
+        
+        .badge-blue {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: #3B82F6;
+        }
+        
+        .badge-amber {
+            background-color: rgba(245, 158, 11, 0.1);
+            color: #F59E0B;
+        }
+        
+        .sensor-status {
+            display: flex;
+            align-items: center;
+            margin-top: 15px;
+        }
+        
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-normal {
+            background-color: #10B981;
+        }
+        
+        .status-warning {
+            background-color: #F59E0B;
+        }
+        
+        .status-critical {
+            background-color: #EF4444;
+        }
+        
+        .status-text {
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .legend {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            margin-right: 5px;
+        }
+        
+        .delete-button {
+            background-color: #EF4444;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 15px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        
+        .delete-button:hover {
+            background-color: #DC2626;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 992px) {
+            .grid-container {
+                grid-template-columns: 1fr 1fr;
+            }
+            
+            .card-wide {
+                grid-column: span 2;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+            }
+            
+            .main-content {
+                padding: 15px;
+            }
+            
+            .grid-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .card-wide, .card-medium {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <div class="logo-container">
+            <svg class="logo" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="#6366F1"/>
+                <path d="M12,2C6.5,2,2,6.5,2,12s4.5,10,10,10s10-4.5,10-10S17.5,2,12,2z M12,18c-3.3,0-6-2.7-6-6s2.7-6,6-6s6,2.7,6,6S15.3,18,12,18z" fill="white"/>
+            </svg>
+            <span class="logo-text">PoultryAirSense</span>
+        </div>
+        
+        <div class="nav-section">
+            <span class="nav-title">Main Menu</span>
+            <ul class="nav-items">
+                <li class="nav-item active">
+                    <i>📊</i> Dashboard
+                </li>
+                <li class="nav-item">
+                    <i>📡</i> Telemetry
+                </li>
+                <li class="nav-item">
+                    <i>🛰️</i> Systems
+                </li>
+                <li class="nav-item">
+                    <i>📝</i> Reports
+                </li>
+                <li class="nav-item">
+                    <i>📨</i> Messages
+                </li>
+            </ul>
+        </div>
+        
+        <div class="nav-section">
+            <span class="nav-title">Preferences</span>
+            <ul class="nav-items">
+                <li class="nav-item">
+                    <i>⚙️</i> Settings
+                </li>
+                <li class="nav-item">
+                    <i>❓</i> Help
+                </li>
+                <li class="nav-item">
+                    <i>🚪</i> Log Out
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="header">
+            <div class="search-container">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search telemetry data, systems...">
+            </div>
+            
+            <div class="header-actions">
+                <button class="action-button">
+                    <span>+ New Report</span>
+                </button>
+                
+                <div class="user-profile">
+                    <div class="user-avatar">MC</div>
+                    <span class="dropdown-icon">▼</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid-container">
+            <div class="card metric-card">
+                <div class="metric-icon blue">
+                    <i>💧</i>
+                    <div class="metric-title">Humidity</div>
+                </div>
+                <div class="metric-value" id="sensor1">--</div>
+                <div id="chart1" class="chart-container"></div>
+            </div>
+            
+            <div class="card metric-card">
+                <div class="metric-icon green">
+                    <i>🌡️</i>
+                    <div class="metric-title">Temperature</div>
+                </div>
+                <div class="metric-value" id="sensor2">--</div>
+                <div id="chart2" class="chart-container"></div>
+            </div>
+            
+            <div class="card metric-card">
+                <div class="metric-icon amber">
+                    <i>🔬</i>
+                    <div class="metric-title">CO Level</div>
+                </div>
+                <div class="metric-value" id="sensor3">--</div>
+                <div id="chart3" class="chart-container"></div>
+            </div>
+            
+            <div class="card metric-card">
+                <div class="metric-icon purple">
+                    <i>☣️</i>
+                    <div class="metric-title">NH3 Level</div>
+                </div>
+                <div class="metric-value" id="sensor4">--</div>
+                <div id="chart4" class="chart-container"></div>
+            </div>
+        </div>
+        
+        <div class="grid-container">
+            <div class="card card-medium">
+                <div class="chart-header">
+                    <div class="chart-title">Environmental Parameters Summary</div>
+                    <div class="date-filter" id="dateSelector">
+                        Today <span>▼</span>
+                    </div>
+                </div>
+                <div id="summaryChart" class="chart-container chart-tall"></div>
+            </div>
+        </div>
+        
+        <div class="card card-wide">
+            <div class="chart-header">
+                <div class="chart-title">Telemetry Data Log</div>
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #3B82F6;"></div>
+                        <span>Humidity</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #10B981;"></div>
+                        <span>Temperature</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #F59E0B;"></div>
+                        <span>CO Level</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #8B5CF6;"></div>
+                        <span>NH3 Level</span>
+                    </div>
+                </div>
+            </div>
+            
+            <table class="data-table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Select</th>
+                        <th>Timestamp</th>
+                        <th>Humidity</th>
+                        <th>Temperature</th>
+                        <th>CO Level</th>
+                        <th>NH3 Level</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            
+            <button class="delete-button" onclick="deleteSelectedRows()">Delete Selected</button>
+        </div>
+    </div>
+
+    <script>
+        const channelID = '2948761';
+        const readAPIKey = 'LB4GOKF7LYBA1CHK';
+        
+        let dateMenu = document.getElementById('dateSelector');
+        let dateOptions = ['Today', 'Yesterday', '2 Days Ago'];
+        let currentDateOption = 'today';
+        
+        dateMenu.addEventListener('click', function() {
+            let index = dateOptions.indexOf(dateMenu.innerText.trim());
+            index = (index + 1) % dateOptions.length;
+            dateMenu.innerText = dateOptions[index] + ' ▼';
+            
+            if (index === 0) currentDateOption = 'today';
+            else if (index === 1) currentDateOption = 'yesterday';
+            else currentDateOption = '2days';
+            
+            updateCharts(currentDateOption);
+        });
+
+        function updateSensorValues() {
+            $.getJSON(`https://api.thingspeak.com/channels/${channelID}/feeds.json?api_key=${readAPIKey}&results=1`, function(data) {
+                if (data.feeds.length > 0) {
+                    $('#sensor1').text((data.feeds[0].field1 || "--") + "%");
+                    $('#sensor2').text((data.feeds[0].field2 || "--") + " °C");
+                    $('#sensor3').text((data.feeds[0].field3 || "--") + " ppm");
+                    $('#sensor4').text((data.feeds[0].field4 || "--") + " ppm");
+                }
+            });
+        }
+
+        function updateCharts(dateRange) {
+            const colors = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6'];
+            const titles = ['Humidity (%)', 'Temperature (°C)', 'CO Level (ppm)', 'NH3 Level (ppm)'];
+            const units = ['%', '°C', 'ppm', 'ppm'];
+            
+            // For individual charts
+            for (let field = 1; field <= 4; field++) {
+                $.getJSON(`https://api.thingspeak.com/channels/${channelID}/fields/${field}.json?results=50&api_key=${readAPIKey}`, function(data) {
+                    let x = [], y = [];
+                    let rows = '';
+
+                    data.feeds.forEach(feed => {
+                        let time = new Date(feed.created_at);
+                        if ((dateRange === 'today' && time.getDate() === new Date().getDate()) ||
+                            (dateRange === 'yesterday' && time.getDate() === new Date().getDate() - 1) ||
+                            (dateRange === '2days' && time.getDate() === new Date().getDate() - 2)) {
+                            
+                            x.push(time);
+                            y.push(parseFloat(feed[`field${field}`]));
+                            
+                            // Only add rows when processing field 1 to avoid duplication
+                            if (field === 1) {
+                                let status = 'Normal';
+                                let statusClass = 'badge-green';
+                                
+                                // Check for warning conditions
+                                if (parseFloat(feed.field3) > 50 || parseFloat(feed.field4) > 10) {
+                                    status = 'Warning';
+                                    statusClass = 'badge-amber';
+                                }
+                                
+                                rows += `<tr>
+                                    <td><input type="checkbox" class="rowCheckbox"></td>
+                                    <td>${time.toLocaleString()}</td>
+                                    <td>${feed.field1 ? feed.field1 + "%" : "--"}</td>
+                                    <td>${feed.field2 ? feed.field2 + " °C" : "--"}</td>
+                                    <td>${feed.field3 ? feed.field3 + " ppm" : "--"}</td>
+                                    <td>${feed.field4 ? feed.field4 + " ppm" : "--"}</td>
+                                    <td><span class="badge ${statusClass}">${status}</span></td>
+                                </tr>`;
+                            }
+                        }
+                    });
+
+                    // Modern chart style
+                    const layout = {
+                        paper_bgcolor: 'rgba(0,0,0,0)',
+                        plot_bgcolor: 'rgba(0,0,0,0)',
+                        font: {
+                            family: 'Inter, sans-serif',
+                            size: 12,
+                            color: '#64748B'
+                        },
+                        margin: { t: 5, r: 10, b: 30, l: 40 },
+                        xaxis: {
+                            showgrid: true,
+                            gridcolor: '#E2E8F0',
+                            tickfont: { size: 10 }
+                        },
+                        yaxis: {
+                            showgrid: true,
+                            gridcolor: '#E2E8F0',
+                            tickfont: { size: 10 },
+                            title: {
+                                text: titles[field-1],
+                                font: {
+                                    size: 12,
+                                    color: '#64748B'
+                                }
+                            }
+                        },
+                        showlegend: false
+                    };
+
+                    Plotly.newPlot(`chart${field}`, [{
+                        x: x,
+                        y: y,
+                        type: 'scatter',
+                        mode: 'lines',
+                        fill: 'tozeroy',
+                        line: {
+                            color: colors[field-1],
+                            width: 2,
+                            shape: 'spline'
+                        },
+                        fillcolor: colors[field-1].replace(')', ', 0.1)').replace('rgb', 'rgba')
+                    }], layout, {responsive: true});
+
+                    if (field === 1) {
+                        $('#dataTable tbody').html(rows);
+                    }
+                }); 
+            }
+            
+            // For summary chart that shows all parameters
+            let allData = [];
+            let promises = [];
+            
+            for (let field = 1; field <= 4; field++) {
+                let promise = $.getJSON(`https://api.thingspeak.com/channels/${channelID}/fields/${field}.json?results=50&api_key=${readAPIKey}`);
+                promises.push(promise);
+            }
+            
+            Promise.all(promises).then(results => {
+                let timePoints = new Set();
+                let dataByTime = {};
+                
+                // First pass: collect all unique timestamps
+                results.forEach((data, index) => {
+                    data.feeds.forEach(feed => {
+                        let time = new Date(feed.created_at);
+                        if ((dateRange === 'today' && time.getDate() === new Date().getDate()) ||
+                            (dateRange === 'yesterday' && time.getDate() === new Date().getDate() - 1) ||
+                            (dateRange === '2days' && time.getDate() === new Date().getDate() - 2)) {
+                            
+                            let timeStr = time.toISOString();
+                            timePoints.add(timeStr);
+                            
+                            if (!dataByTime[timeStr]) {
+                                dataByTime[timeStr] = {
+                                    time: time,
+                                    values: [null, null, null, null]
+                                };
+                            }
+                            
+                            dataByTime[timeStr].values[index] = parseFloat(feed[`field${index+1}`]);
+                        }
+                    });
+                });
+                
+                // Prepare data for plotting
+                let traces = [];
+                for (let i = 0; i < 4; i++) {
+                    let x = [];
+                    let y = [];
+                    
+                    Array.from(timePoints).sort().forEach(timeStr => {
+                        if (dataByTime[timeStr].values[i] !== null) {
+                            x.push(dataByTime[timeStr].time);
+                            y.push(dataByTime[timeStr].values[i]);
+                        }
+                    });
+                    
+                    traces.push({
+                        x: x,
+                        y: y,
+                        type: 'scatter',
+                        mode: 'lines',
+                        name: titles[i],
+                        line: {
+                            color: colors[i],
+                            width: 2
+                        }
+                    });
+                }
+                
+                const layout = {
+                    paper_bgcolor: 'rgba(0,0,0,0)',
+                    plot_bgcolor: 'rgba(0,0,0,0)',
+                    font: {
+                        family: 'Inter, sans-serif',
+                        size: 12,
+                        color: '#64748B'
+                    },
+                    margin: { t: 10, r: 10, b: 30, l: 50 },
+                    xaxis: {
+                        showgrid: true,
+                        gridcolor: '#E2E8F0',
+                        tickfont: { size: 10 }
+                    },
+                    yaxis: {
+                        showgrid: true,
+                        gridcolor: '#E2E8F0',
+                        tickfont: { size: 10 }
+                    },
+                    legend: {
+                        orientation: 'h',
+                        y: -0.2
+                    }
+                };
+                
+                Plotly.newPlot('summaryChart', traces, layout, {responsive: true});
+            });
+        }
+
+        function deleteSelectedRows() {
+            $(".rowCheckbox:checked").closest('tr').remove();
+        }
+
+        // Initialize everything
+        updateSensorValues();
+        setInterval(updateSensorValues, 5000);
+        updateCharts('today');
+    </script>
+</body>
+</html>
